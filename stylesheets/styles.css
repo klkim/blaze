@@ -385,13 +385,13 @@ footer p + p {
 
 .example-result {
   position: absolute;
-  left: 490px;
+  right: 50px;
   color: #222;
-  margin-top: 100px;
+  margin-top: 150px;
+  padding: 10px;
   width: 200px;
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
   border-radius: 5px;
   background: rgba(255, 255, 255, 0.8);
-  padding: 5px;
 }
