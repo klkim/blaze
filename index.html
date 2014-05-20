@@ -107,32 +107,39 @@
         <h2>Examples</h2>
         <h3>Use reactive variables in your code</h3>
 
-        <p>Lorem ipsum, reactive, updates data-binding by helper datamodel MVCCVCVVP.</p>
+        <p>Use Handlebar's style templates with helpers and reactive variables.</p>
         <div id="example1">
           <div class="example-result"></div>
           <div class="example-code"></div>
         </div>
 
         <script type="text/spacebars" name="example1">
-          You pressed the button {{getCount}} times. <input type="button" value="+1">
+          Click buttons to increase their values:
+          <button id="xb">{{X}}</button> x <button id="yb">{{Y}}</button> = {{Z}}
         </script>
 
         <script type="text/spacebars-code" name="example1">
-          var count = Blaze.Var(0);
+          var countX = Blaze.Var(1);
+          var countY = Blaze.Var(1);
 
-          Template.example1.getCount = function () {
-            return count.get();
-          };
+          Template.example1.helpers({
+            X: function () { return countX.get(); },
+            Y: function () { return countY.get(); },
+            Z: function () { return countX.get() * countY.get(); }
+          });
 
           Template.example1.events({
-            'click input': function () {
-              count.set(count.get() + 1);
+            'click #xb': function () {
+              countX.set(countX.get() + 1);
+            },
+            'click #yb': function () {
+              countY.set(countY.get() + 1);
             }
           });
         </script>
 
         <script type="text/javascript">
-          function htmlEncode( input ) {
+          function htmlEncode (input) {
             return String(input)
             .replace(/&/g, '&amp;')
             .replace(/"/g, '&quot;')
@@ -141,14 +148,18 @@
             .replace(/>/g, '&gt;');
           }
 
-          var $template = $("script[type='text/spacebars'][name='example1']");
-          var templateText = $template.html().replace(/^ {10}/mg, ' ').trim();
-          compileTemplate($template[0]);
-          var codeText = $("script[type='text/spacebars-code'][name='example1']").text().replace(/^ {10}/mg, '').trim();
-          eval(codeText);
-          UI.insert(UI.render(Template.example1), $("#example1 .example-result").get(0));
-          $("#example1 .example-code").append($('<pre><code>' + htmlEncode(templateText) + '</code></pre>'));
-          $("#example1 .example-code").append($('<pre><code>' + codeText + '</code></pre>'));
+          function renderExample (exampleName) {
+            var $template = $("script[type='text/spacebars'][name='" + exampleName + "']");
+            var templateText = $template.html().replace(/^ {10}/mg, ' ').trim();
+            compileTemplate($template[0]);
+            var codeText = $("script[type='text/spacebars-code'][name='" + exampleName + "']").text().replace(/^ {10}/mg, '').trim();
+            eval(codeText);
+            UI.insert(UI.render(Template.example1), $("#example1 .example-result").get(0));
+            $("#" + exampleName + " .example-code").append($('<pre><code>' + htmlEncode(templateText) + '</code></pre>'));
+            $("#" + exampleName + " .example-code").append($('<pre><code>' + codeText + '</code></pre>'));
+          }
+
+          renderExample("example1");
         </script>
       </section>
     </div>

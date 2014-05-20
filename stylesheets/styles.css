@@ -330,6 +330,10 @@ footer p + p {
     margin: 20px 0
 }
 
+button {
+  padding: 5px 10px;
+}
+
 @media print, screen and (max-width: 740px) {
   body {
     padding: 0;
