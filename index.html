@@ -176,7 +176,7 @@
         <script type="text/spacebars" name="example2">
           <h3> Leaders (sorted): </h3>
           {{#each leaders}}
-            <div class="leader">{{this}}</div>
+            <div>{{this}}</div>
           {{/each}}
 
           <form name="leader-form">
@@ -185,7 +185,7 @@
         </script>
 
         <script type="text/spacebars-code" name="example2">
-          var names = Blaze.Var(["Yuriy Gagarin", "Neil Armstrong"]);
+          var names = Blaze.Var(["Yuriy Gagarin", "Neil Armstrong", "Yi So-yeon"]);
 
           Template.example2.helpers({
             leaders: function () {
