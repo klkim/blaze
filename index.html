@@ -213,9 +213,84 @@
           });
         </script>
 
+
+        <h3>SVG manipulations</h3>
+        <p>Since Blaze is awared of SVG, it is really convinient to combine regular HTML-based templates with simple SVG-based animations where SVG-centric frameworks like d3.js would be an overkill.</p>
+
+        <div id="example3">
+          <div class="example-result"></div>
+          <div class="example-code"></div>
+        </div>
+
+        <script type="text/spacebars" name="example3">
+          <svg xmlns="http://www.w3.org/2000/svg"
+               width="200" height="200"
+               viewBox="-55 -55 110 110">
+
+            <!-- bounding circle -->
+            <circle style="stroke: black; fill: #eee;"
+                    cx="0" cy="0" r="50"/>
+
+            <!-- hour, minute and second hands -->
+            {{#with handData}}
+              <line {{radial hourDegrees 0 .55}}
+                    style="stroke-width: 3px;
+                           stroke: green;" />
+              <line {{radial minuteDegrees 0 .85}}
+                    style="stroke-width: 2px;
+                           stroke: blue;" />
+              <line {{radial secondDegrees 0 .95}}
+                    style="stroke-width: 1px;
+                           stroke: red;" />
+            {{/with}}
+
+            <!-- tick marks -->
+            {{#each hours}}
+              <line {{radial degrees 0.9 1}}
+                    style="stroke-width: 3px;
+                           stroke: black;" />
+            {{/each}}
+          </svg>
+        </script>
+
+        <script type="text/spacebars-code" name="example3">
+          var date = Blaze.Var(new Date);
+
+          // every second update the reactive time and date value
+          setInterval(function () {
+            date.set(new Date);
+          }, 1000);
+
+          Template.example3.helpers({
+            hours: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+            degrees: function () {
+              return 30 * this;
+            },
+            handData: function () {
+              var time = date.get();
+              return { hourDegrees: time.getHours() * 30,
+                       minuteDegrees: time.getMinutes() * 6,
+                       secondDegrees: time.getSeconds() * 6 };
+            },
+            radial: function (angleDegrees,
+                              startFraction,
+                              endFraction) {
+              var r = 50;
+              var radians = (angleDegrees-90) / 180 * Math.PI;
+              return {
+                x1: r * startFraction * Math.cos(radians),
+                y1: r * startFraction * Math.sin(radians),
+                x2: r * endFraction * Math.cos(radians),
+                y2: r * endFraction * Math.sin(radians)
+              };
+            }
+          });
+        </script>
+
         <script type="text/javascript">
           renderExample("example1");
           renderExample("example2");
+          renderExample("example3");
         </script>
       </section>
     </div>
