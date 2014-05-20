@@ -174,14 +174,13 @@
         </div>
 
         <script type="text/spacebars" name="example2">
-          Leaders (sorted alphabetically):
+          <h3> Leaders (sorted): </h3>
           {{#each leaders}}
             <div class="leader">{{this}}</div>
           {{/each}}
 
           <form name="leader-form">
-            New name: <input type="text" id="leader-input">
-            <input type="submit" value="Add to the list">
+            <input type="text" id="leader-input"><input type="submit" value="+">
           </form>
         </script>
 
