@@ -399,3 +399,8 @@ button {
   border-radius: 5px;
   background: rgba(255, 255, 255, 0.8);
 }
+
+#example2 .example-result {
+  margin-top: 420px;
+}
+

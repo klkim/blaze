@@ -39,12 +39,33 @@
 
       // Compile all the templates on the page to HTMLJS AST
       $ = jQuery;
+      _ = Package.underscore._;
       compileTemplate = function (script) {
         var name = script.getAttribute('name');
         var renderFuncCode = Spacebars.compile(script.innerHTML);
         eval("Template.__define__(" + JSON.stringify(name) +
              ", " + renderFuncCode + ");");
       };
+
+      function htmlEncode (input) {
+        return String(input)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, "'")
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+      }
+
+      function renderExample (exampleName) {
+        var $template = $("script[type='text/spacebars'][name='" + exampleName + "']");
+        var templateText = $template.html().replace(/^ {10}/mg, ' ').trim();
+        compileTemplate($template[0]);
+        var codeText = $("script[type='text/spacebars-code'][name='" + exampleName + "']").text().replace(/^ {10}/mg, '').trim();
+        eval(codeText);
+        UI.insert(UI.render(Template[exampleName]), $("#" + exampleName + " .example-result").get(0));
+        $("#" + exampleName + " .example-code").append($('<pre><code>' + htmlEncode(templateText) + '</code></pre>'));
+        $("#" + exampleName + " .example-code").append($('<pre><code>' + codeText + '</code></pre>'));
+      }
     </script>
 
     <link rel="stylesheet" href="highlight/styles/sunburst.css">
@@ -138,28 +159,64 @@
           });
         </script>
 
+
+        <h3>Intellegent DOM patching</h3>
+        <p>Blaze will intelligently diff your data model and make minimal DOM
+          changes. In this example a new Div element will be inserted in the
+          correct position.</p>
+
+        <p>It is possible due to structural templates and internal DOM
+          representation that Blaze manages internally.</p>
+
+        <div id="example2">
+          <div class="example-result"></div>
+          <div class="example-code"></div>
+        </div>
+
+        <script type="text/spacebars" name="example2">
+          Leaders (sorted alphabetically):
+          {{#each leaders}}
+            <div class="leader">{{this}}</div>
+          {{/each}}
+
+          <form name="leader-form">
+            New name: <input type="text" id="leader-input">
+            <input type="submit" value="Add to the list">
+          </form>
+        </script>
+
+        <script type="text/spacebars-code" name="example2">
+          var names = Blaze.Var(["Yuriy Gagarin", "Neil Armstrong"]);
+
+          Template.example2.helpers({
+            leaders: function () {
+              // copy the contents of data model
+              var leaders = names.get().slice(0);
+              // don't change the data model, work only on presentation model
+              return leaders.sort();
+            }
+          });
+
+          Template.example2.events({
+            'submit form': function () {
+              var allNames = names.get().slice(0);
+
+              // grab the value from DOM
+              var newName = $("#leader-input").val();
+              $("#leader-input").val("");
+
+              // update the data model
+              allNames.push(newName);
+              names.set(allNames);
+
+              return false;
+            }
+          });
+        </script>
+
         <script type="text/javascript">
-          function htmlEncode (input) {
-            return String(input)
-            .replace(/&/g, '&amp;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, "'")
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
-          }
-
-          function renderExample (exampleName) {
-            var $template = $("script[type='text/spacebars'][name='" + exampleName + "']");
-            var templateText = $template.html().replace(/^ {10}/mg, ' ').trim();
-            compileTemplate($template[0]);
-            var codeText = $("script[type='text/spacebars-code'][name='" + exampleName + "']").text().replace(/^ {10}/mg, '').trim();
-            eval(codeText);
-            UI.insert(UI.render(Template.example1), $("#example1 .example-result").get(0));
-            $("#" + exampleName + " .example-code").append($('<pre><code>' + htmlEncode(templateText) + '</code></pre>'));
-            $("#" + exampleName + " .example-code").append($('<pre><code>' + codeText + '</code></pre>'));
-          }
-
           renderExample("example1");
+          renderExample("example2");
         </script>
       </section>
     </div>
