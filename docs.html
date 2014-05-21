@@ -1,0 +1,1047 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Meteor Blaze - Docs</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/docs.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+
+    <!-- This is how you link Blaze -->
+    <script src="https://s3.amazonaws.com/com.meteor/blaze.js"></script>
+
+    <script>
+      // This should be part of the Blaze core
+
+      // Reactive variable for Blaze
+      Deps = Package.deps.Deps;
+      Blaze = {};
+      Blaze.Var = function (initVal) {
+        if (! (this instanceof Blaze.Var))
+          return new Blaze.Var(initVal);
+        this._dep = new Deps.Dependency;
+        this._value = initVal;
+      };
+
+      Blaze.Var.prototype.get = function () {
+        this._dep.depend();
+        return this._value;
+      };
+
+      Blaze.Var.prototype.set = function (val) {
+        if (this._value === val)
+          return val;
+        this._dep.changed();
+        return (this._value = val);
+      };
+
+      // Compile all the templates on the page to HTMLJS AST
+      $ = jQuery;
+      _ = Package.underscore._;
+      compileTemplate = function (script) {
+        var name = script.getAttribute('name');
+        var renderFuncCode = Spacebars.compile(script.innerHTML);
+        eval("Template.__define__(" + JSON.stringify(name) +
+             ", " + renderFuncCode + ");");
+      };
+
+      function htmlEncode (input) {
+        return String(input)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, "'")
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+      }
+
+      function renderExample (exampleName) {
+        var $template = $("script[type='text/spacebars'][name='" + exampleName + "']");
+        var templateText = $template.html().replace(/^ {10}/mg, ' ').trim();
+        compileTemplate($template[0]);
+        var codeText = $("script[type='text/spacebars-code'][name='" + exampleName + "']").text().replace(/^ {10}/mg, '').trim();
+        eval(codeText);
+        UI.insert(UI.render(Template[exampleName]), $("#" + exampleName + " .example-result").get(0));
+        $("#" + exampleName + " .example-code").append($('<pre><code>' + htmlEncode(templateText) + '</code></pre>'));
+        $("#" + exampleName + " .example-code").append($('<pre><code>' + codeText + '</code></pre>'));
+      }
+    </script>
+
+    <link rel="stylesheet" href="highlight/styles/sunburst.css">
+    <script src="highlight/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+
+  <div class="nav">
+    <h2><a href="#livehtmltemplates" class="">Live HTML Templates</a></h2>
+    <h2><a href="#templates_api" class="">Templates</a></h2>
+    <h3><a href="#templates_api" class="">Template.<i>myTemplate</i>.</a></h3>
+    <h4><a href="#template_events" class="">events</a></h4>
+    <h4><a href="#template_helpers" class="">helpers</a></h4>
+    <h4><a href="#template_rendered" class="">rendered</a></h4>
+    <h4><a href="#template_created" class="">created</a></h4>
+    <h4><a href="#template_destroyed" class="">destroyed</a></h4>
+    <h3><a href="#template_inst" class="">Template instances</a></h3>
+    <h4><a href="#template_findAll" class=""><i>this</i>.findAll</a></h4>
+    <h4><a href="#template_find" class=""><i>this</i>.find</a></h4>
+    <h4><a href="#template_firstNode" class=""><i>this</i>.firstNode</a></h4>
+    <h4><a href="#template_lastNode" class=""><i>this</i>.lastNode</a></h4>
+    <h4><a href="#template_data" class=""><i>this</i>.data</a></h4>
+    <h3><a href="#ui" class="">UI</a></h3>
+    <h4><a href="#ui_registerhelper" class="">UI.registerHelper</a></h4>
+    <h4><a href="#ui_body" class="">UI.body</a></h4>
+    <h4><a href="#ui_render" class="">UI.render</a></h4>
+    <h4><a href="#ui_renderwithdata" class="">UI.renderWithData</a></h4>
+    <h4><a href="#ui_insert" class="">UI.insert</a></h4>
+    <h3><a href="#eventmaps" class="noncode">Event maps</a></h3>
+  </div>
+
+    <div class="wrapper">
+      <header>
+        <h1>Blaze</h1>
+        <p>Meteor's Reactive UI Library</p>
+        <p class="view"><a href="https://github.com/meteor/blaze">View the Project on GitHub <small>meteor/blaze</small></a></p>
+        <ul>
+          <li><a href="http://docs.meteor.com/#livehtmltemplates">Read <strong>Docs</strong></a></li>
+          <li><a href="https://groups.google.com/forum/#!forum/meteor-blaze">Join the <strong>Discussion</strong></a></li>
+          <li><a href="https://github.com/meteor/blaze">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+<h2 id="livehtmltemplates">Live HTML templates</h2>
+
+<p>HTML templating is central to web applications. With Blaze, Meteor's live
+page update technology, you can render your HTML <em>reactively</em>, meaning
+that it will update automatically to track changes in the data used to
+generate it.</p>
+
+<p>Meteor makes it easy to use your favorite HTML templating language along with
+Meteor's live page update technology. Just write your template as you normally
+would, and Meteor will take care of making it update in realtime.</p>
+
+<p>Meteor ships with a templating language called
+<a href="https://github.com/meteor/meteor/blob/devel/packages/spacebars/README.md" target="_blank">Spacebars</a>,
+inspired by <a href="http://handlebarsjs.com/" target="_blank">Handlebars</a>.  It shares some of the
+spirit and syntax of Handlebars, but it has been tailored to produce reactive
+Meteor templates when compiled.</p>
+
+<div class="note">
+  <p>Today, the only templating system that ships with Meteor is Spacebars, though
+  our community has created packages for other languages such as
+  <a href="https://atmospherejs.com/package/jade" target="_blank">Jade</a>.</p>
+</div>
+
+<p>To define templates, create a file in your project with the <code>.html</code>
+extension. In the file, make a <code>&lt;template&gt;</code> tag and give it a
+<code>name</code> attribute. Put the template contents inside the tag. Meteor
+will precompile the template, ship it down to the client, and make it
+available as on the global <code>Template</code> object.</p>
+
+<p>When you app is loaded, it automatically renders the special template called
+<code>&lt;body&gt;</code>, which is written using the <code>&lt;body&gt;</code> element instead of a
+<code>&lt;template&gt;</code>. You insert a template inside another template by using the
+<code>{{&gt; inclusion}}</code> operator.</p>
+
+<p>The easiest way to get data into templates is by defining helper
+functions in JavaScript. Just add the helper functions directly on the
+<code>Template.</code><em>templateName</em> object. Putting it all together:</p>
+
+<pre><code>&lt;!-- in myapp.html --&gt;
+&lt;body&gt;
+  &lt;h1&gt;Today's weather!&lt;/h1&gt;
+  {{&gt; forecast}}
+&lt;/body&gt;
+
+&lt;template name="forecast"&gt;
+  &lt;div&gt;It'll be {{prediction}} tonight&lt;/div&gt;
+&lt;/template&gt;</code></pre>
+
+<pre><code>// in client/myapp.js: reactive helper function
+Template.forecast.prediction = function () {
+  return Session.get("weather");
+};
+
+// in the JavaScript console
+&gt; Session.set("weather", "cloudy");
+&gt; document.body.innerHTML
+ =&gt; "&lt;h1&gt;Today's weather!&lt;/h1&gt; &lt;div&gt;It'll be cloudy tonight&lt;/div&gt;"
+
+&gt; Session.set("weather", "cool and dry");
+&gt; document.body.innerHTML
+ =&gt; "&lt;h1&gt;Today's weather!&lt;/h1&gt; &lt;div&gt;It'll be cool and dry tonight&lt;/div&gt;"
+</code></pre>
+
+<p>To iterate over an array or database cursor, use <code>{{#each}}</code>:</p>
+
+<pre><code>&lt;!-- in myapp.html --&gt;
+&lt;template name="players"&gt;
+  {{#each topScorers}}
+    &lt;div&gt;{{name}}&lt;/div&gt;
+  {{/each}}
+&lt;/template&gt;</code></pre>
+
+<pre><code>// in myapp.js
+Template.players.topScorers = function () {
+  return Users.find({score: {$gt: 100}}, {sort: {score: -1}});
+};</code></pre>
+
+<p>In this case, the data is coming from a database query. When the
+database cursor is passed to <code>{{#each}}</code>, it will wire up all of the
+machinery to efficiently add and move DOM nodes as new results enter
+the query.</p>
+
+<p>Helpers can take arguments, and they receive the current template context data
+in <code>this</code>. Note that some block helpers change the current context (notably
+<code>{{#each}}</code> and <code>{{#with}}</code>):</p>
+
+<pre><code>// in a JavaScript file
+Template.players.leagueIs = function (league) {
+  return this.league === league;
+};</code></pre>
+
+<pre><code>&lt;!-- in a HTML file --&gt;
+&lt;template name="players"&gt;
+  {{#each topScorers}}
+    {{#if leagueIs "junior"}}
+      &lt;div&gt;Junior: {{name}}&lt;/div&gt;
+    {{/if}}
+    {{#if leagueIs "senior"}}
+      &lt;div&gt;Senior: {{name}}&lt;/div&gt;
+    {{/if}}
+  {{/each}}
+&lt;/template&gt;
+</code></pre>
+
+<p>Helpers can also be used to pass in constant data.</p>
+
+<pre><code>// Works fine with {{#each sections}}
+Template.report.sections = ["Situation", "Complication", "Resolution"];
+</code></pre>
+
+<p>Finally, you can use an <code>events</code> declaration on a template function to set up a
+table of event handlers. The format is documented at <a href="#eventmaps">Event
+Maps</a>. The <code>this</code> argument to the event handler will be
+the data context of the element that triggered the event.</p>
+
+<pre><code>&lt;!-- myapp.html --&gt;
+&lt;template name="scores"&gt;
+  {{#each player}}
+    {{&gt; playerScore}}
+  {{/each}}
+&lt;/template&gt;
+</code></pre>
+
+<pre><code>&lt;template name="playerScore"&gt;
+  &lt;div&gt;{{name}}: {{score}}
+    &lt;span class="givePoints"&gt;Give points&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/template&gt;</code></pre>
+
+<code><pre>// myapp.js
+Template.playerScore.events({
+  'click .givePoints': function () {
+    Users.update(this._id, {$inc: {score: 2}});
+  }
+});
+</code></pre>
+
+<p>For more details about Spacebars, read <a href="https://github.com/meteor/meteor/blob/devel/packages/spacebars/README.md" target="_blank">the Spacebars
+README</a>.</p>
+
+<hr>
+
+<h2 id="templates_api"><span><a class="selflink" href="#templates">Templates</a></span></h2>
+
+<p>When you write a template as <code>&lt;template name="foo"&gt; ... &lt;/template&gt;</code> in an HTML file in your app, Meteor generates a
+"component object" named <code>Template.foo</code>.</p>
+
+<div class="note">
+  <p>Meteor's component API is currently in flux. This section documents a few
+   features of the component object that are useful for writing apps; a future
+   release will elaborate more about how components work and about how to build
+   components that aren't just template.</p>
+</div>
+
+<p>The same template may occur many times on a page, and these
+occurrences are called template instances.  Template instances have a
+life cycle of being created, put into the document, and later taken
+out of the document and destroyed.  Meteor manages these stages for
+you, including determining when a template instance has been removed
+or replaced and should be cleaned up.  You can associate data with a
+template instance, and you can access its DOM nodes when it is in the
+document.</p>
+
+<div class="api ">
+
+<h3 id="template_events">
+  <a class="name selflink" href="#template_events">Template.<em>myTemplate</em>.events(eventMap)</a>
+
+
+</h3>
+
+<div class="desc">
+<p>Specify event handlers for this template.</p>
+</div>
+
+<h4>Arguments</h4>
+
+<dl class="args">
+
+<dt><span class="name">eventMap</span>
+  <span class="type">
+
+      <a href="#eventmaps">Event map</a>
+
+  </span></dt>
+<dd><p>Event handlers to associate with this template.</p></dd>
+
+</dl>
+
+<p></p></div><p></p>
+
+<p>Declare event handlers for instances of this template. Multiple calls add
+new event handlers in addition to the existing ones.</p>
+
+<p>See <a href="#eventmaps">Event Maps</a> for a detailed description of the event
+map format and how event handling works in Meteor.</p>
+
+<div class="api ">
+
+<h3 id="template_helpers">
+  <a class="name selflink" href="#template_helpers">Template.<em>myTemplate</em>.helpers(helpers)</a>
+
+
+</h3>
+
+<div class="desc">
+<p>Specify template helpers available to this template.</p>
+</div>
+
+<h4>Arguments</h4>
+
+<dl class="args">
+
+<dt><span class="name">helpers</span>
+  <span class="type">
+
+      Object
+
+  </span></dt>
+<dd><p>Dictionary of helper functions by name.</p></dd>
+
+</dl>
+
+<p></p></div><p></p>
+
+<p>Each template has a local dictionary of helpers that are made available to it,
+and this call specifies helpers to add to the template's dictionary.</p>
+
+<p>Example:</p>
+
+<pre><code>Template.myTemplate.helpers({
+  foo: function () {
+    return Session.get("foo");
+  }
+});
+</code></pre>
+
+<p>Now you can invoke this helper with <code>{{foo}}</code> in the template defined
+with <code>&lt;template name="myTemplate"&gt;</code>.</p>
+
+<p>The following syntax is a shorthand for when you only have one helper to define:</p>
+
+<pre><code>Template.myTemplate.foo = function () {
+  return Session.get("foo");
+};
+</code></pre>
+
+<p>To create a helper that can be used in any template, use
+<a href="#ui_registerhelper"><code>UI.registerHelper</code></a>.</p>
+
+<div class="api ">
+
+<h3 id="template_rendered">
+  <a class="name selflink" href="#template_rendered">Template.<em>myTemplate</em>.rendered = function ( ) { ... }</a>
+
+
+</h3>
+
+<div class="desc">
+<p>Provide a callback when an instance of a template is rendered.</p>
+</div>
+
+<p></p></div><p></p>
+
+<p>This callback is called once when an instance of Template.<em>myTemplate</em> is
+rendered into DOM nodes and put into the document for the first time.</p>
+
+<p>In the body of the callback, <code>this</code> is a <a href="#template_inst">template
+instance</a> object that is unique to this occurrence of
+the template and persists across re-renderings.  Use the <code>created</code> and
+<code>destroyed</code> callbacks to perform initialization or clean-up on the
+object.</p>
+
+<p>Because your template has been rendered, you can use functions like
+<code>this.findAll</code> which look at its DOM nodes.</p>
+
+<div class="api ">
+
+<h3 id="template_created">
+  <a class="name selflink" href="#template_created">Template.<em>myTemplate</em>.created = function ( ) { ... }</a>
+
+
+</h3>
+
+<div class="desc">
+<p>Provide a callback when an instance of a template is created.</p>
+</div>
+
+<p></p></div><p></p>
+
+<p>This callback is called before your template's logic is evaluated for the first
+time.  Inside the callback, <code>this</code> is the new <a href="#template_inst">template
+instance</a> object.  Properties you set on this object will be
+visible from the <code>rendered</code> and <code>destroyed</code> callbacks and from event handlers.</p>
+
+<p>This callback fires once and is the first callback to fire.  Every
+<code>created</code> has a corresponding <code>destroyed</code>; that is, if you get a
+<code>created</code> callback with a certain template instance object in <code>this</code>,
+you will eventually get a <code>destroyed</code> callback for the same object.</p>
+
+<div class="note">
+  <p>The <code>created</code> callback is not currently very useful. In a later release, the
+  template instance object (or something like it) will be visible from helper
+  functions, and <code>created</code> will be a useful way to set up values that are read
+  from helpers. For now, you probably just want to use <code>rendered</code>.</p>
+</div>
+
+<div class="api ">
+
+<h3 id="template_destroyed">
+  <a class="name selflink" href="#template_destroyed">Template.<em>myTemplate</em>.destroyed = function ( ) { ... }</a>
+
+
+</h3>
+
+<div class="desc">
+<p>Provide a callback when an instance of a template is destroyed.</p>
+</div>
+
+<p></p></div><p></p>
+
+<p>This callback is called when an occurrence of a template is taken off
+the page for any reason and not replaced with a re-rendering.  Inside
+the callback, <code>this</code> is the <a href="#template_inst">template instance</a> object
+being destroyed.</p>
+
+<p>This callback is most useful for cleaning up or undoing any external effects of
+<code>created</code> or <code>rendered</code>.  It fires once and is the last callback to fire.</p>
+
+<h2 id="template_inst"><span>Template instances</span></h2>
+
+<p>A template instance object represents an occurrence of a template in
+the document.  It can be used to access the DOM and it can be
+assigned properties that persist as the template is reactively updated.</p>
+
+<p>Template instance objects are found as the value of <code>this</code> in the
+<code>created</code>, <code>rendered</code>, and <code>destroyed</code> template callbacks, and as an
+argument to event handlers.</p>
+
+<div class="note">
+  <p>You cannot currently access the template instance object from helpers.
+  We plan to refactor how template instances work and make them more
+  universally accessible.</p>
+</div>
+
+<p>In addition to the properties and functions described below, you can assign
+additional properties of your choice to the object. Use the
+<a href="#template_created"><code>created</code></a> and <a href="#template_destroyed"><code>destroyed</code></a> callbacks
+to perform initialization or clean-up on the object.</p>
+
+<p>You can only access <code>findAll</code>, <code>find</code>, <code>firstNode</code>, and <code>lastNode</code>
+from the <code>rendered</code> callback and event handlers, not from <code>created</code>
+and <code>destroyed</code>, because they require the template instance to be
+in the DOM.</p>
+
+<div class="api ">
+
+<h3 id="template_findAll">
+  <a class="name selflink" href="#template_findAll"><em>this</em>.findAll(selector)</a>
+
+
+</h3>
+
+<div class="desc">
+<p>Find all elements matching <code>selector</code> in this template instance.</p>
+</div>
+
+<h4>Arguments</h4>
+
+<dl class="args">
+
+<dt><span class="name">selector</span>
+  <span class="type">
+
+      String
+
+  </span></dt>
+<dd><p>The CSS selector to match, scoped to the template contents.</p></dd>
+
+</dl>
+
+<p></p></div><p></p>
+
+<p>Returns a <a href="http://api.jquery.com/Types/#jQuery" target="_blank">jQuery object</a> of DOM elements
+matching <code>selector</code>. This object is similar to an array but has other methods
+defined by the jQuery library.</p>
+
+<p>You can also call this function as <code>this.$(selector)</code>.</p>
+
+<p>The template instance serves as the document root for the selector. Only
+elements inside the template and its sub-templates can match parts of
+the selector.</p>
+
+<div class="api ">
+
+<h3 id="template_find">
+  <a class="name selflink" href="#template_find"><em>this</em>.find(selector)</a>
+
+
+</h3>
+
+<div class="desc">
+<p>Find one element matching <code>selector</code> in this template instance.</p>
+</div>
+
+<h4>Arguments</h4>
+
+<dl class="args">
+
+<dt><span class="name">selector</span>
+  <span class="type">
+
+      String
+
+  </span></dt>
+<dd><p>The CSS selector to match, scoped to the template contents.</p></dd>
+
+</dl>
+
+<p></p></div><p></p>
+
+<p>Returns one DOM element matching <code>selector</code>, or <code>null</code> if there are no
+such elements.</p>
+
+<p>The template instance serves as the document root for the selector. Only
+elements inside the template and its sub-templates can match parts of
+the selector.</p>
+
+<div class="api ">
+
+<h3 id="template_firstNode">
+  <a class="name selflink" href="#template_firstNode"><em>this</em>.firstNode</a>
+
+
+</h3>
+
+<div class="desc">
+<p>The first top-level DOM node in this template instance.</p>
+</div>
+
+<p></p></div><p></p>
+
+<p>The two nodes <code>firstNode</code> and <code>lastNode</code> indicate the extent of the
+rendered template in the DOM.  The rendered template includes these
+nodes, their intervening siblings, and their descendents.  These two
+nodes are siblings (they have the same parent), and <code>lastNode</code> comes
+after <code>firstNode</code>, or else they are the same node.</p>
+
+<div class="api ">
+
+<h3 id="template_lastNode">
+  <a class="name selflink" href="#template_lastNode"><em>this</em>.lastNode</a>
+
+
+</h3>
+
+<div class="desc">
+<p>The last top-level DOM node in this template instance.</p>
+</div>
+
+<p></p></div><p></p>
+
+<div class="api ">
+
+<h3 id="template_data">
+  <a class="name selflink" href="#template_data"><em>this</em>.data</a>
+
+
+</h3>
+
+<div class="desc">
+<p>The data context of this instance's latest invocation.</p>
+</div>
+
+<p></p></div><p></p>
+
+<p>This property provides access to the data context at the top level of
+the template.  It is updated each time the template is re-rendered.
+Access is read-only and non-reactive.</p>
+
+<h2 id="ui"><span>Template utilities</span></h2>
+
+<p>The <code>UI</code> namespace contains several utilities that are helpful when writing your
+user interface.  <code>UI.registerHelper</code> allows you to define helper functions which
+you can use in every template.  <code>UI.render</code>, <code>UI.renderWithData</code>, and
+<code>UI.insert</code> allow you to manually render templates and insert them directly into
+any part of the DOM for finer control than just using template inclusions.</p>
+
+<div class="api ">
+
+<h3 id="ui_registerhelper">
+  <a class="name selflink" href="#ui_registerhelper">UI.registerHelper(name, function)</a>
+
+
+</h3>
+
+<div class="desc">
+<p>Defines a <a href="#template_helpers">helper function</a> which can be used from all templates.</p>
+</div>
+
+<h4>Arguments</h4>
+
+<dl class="args">
+
+<dt><span class="name">name</span>
+  <span class="type">
+
+      String
+
+  </span></dt>
+<dd><p>The name of the helper function you are defining.</p></dd>
+
+<dt><span class="name">function</span>
+  <span class="type">
+
+      Function
+
+  </span></dt>
+<dd><p>The helper function itself.</p></dd>
+
+</dl>
+
+<p></p></div><p></p>
+
+<div class="api ">
+
+<h3 id="ui_body">
+  <a class="name selflink" href="#ui_body">UI.body</a>
+
+
+</h3>
+
+<div class="desc">
+<p>The <a href="#templates_api">component object</a> representing your <code>&lt;body&gt;</code> tag.</p>
+</div>
+
+<p></p></div><p></p>
+
+<p>You can define helpers and event maps on <code>UI.body</code> just like on any
+<code>Template.myTemplate</code> object.</p>
+
+<div class="api ">
+
+<h3 id="ui_render">
+  <a class="name selflink" href="#ui_render">UI.render(Template.<em>myTemplate</em>)</a>
+
+
+</h3>
+
+<div class="desc">
+<p>Executes a template's logic.</p>
+</div>
+
+<h4>Arguments</h4>
+
+<dl class="args">
+
+<dt><span class="name">template</span>
+  <span class="type">
+
+      Template
+
+  </span></dt>
+<dd><p>The particular template to evaluate.</p></dd>
+
+</dl>
+
+<p></p></div><p></p>
+
+<p>This returns an "instantiated component" object, which can be passed to
+<a href="#ui_insert"><code>UI.insert</code></a>. The template's <a href="#template_created"><code>created</code></a> callback
+will be invoked.  The component will continue to be updated reactively as the
+data used changes.</p>
+
+<div class="warning">
+  <p>Future releases will provide a richer API for "instantiated components"
+  (probably unifying them with "template instances"). For now, all you can
+  do with them is pass them to <code>UI.insert</code>.</p>
+
+<p>Most users will not need to manually render components or manually insert them
+  into the DOM at all.  As of 0.8.0, if you call <code>UI.render</code> and never insert
+  the result into the DOM, the logic to keep the instantiated component updated
+  will continue running in your browser forever. Additionally, if you remove any
+  part of your DOM using any mechanism other than jQuery, the logic to keep that
+  part of the the DOM updated will continue running.  To avoid these issues,
+  either avoid directly updating the DOM or ensure that any removals go through
+  jQuery.</p>
+</div>
+
+<div class="api ">
+
+<h3 id="ui_renderwithdata">
+  <a class="name selflink" href="#ui_renderwithdata">UI.renderWithData(Template.<em>myTemplate</em>, data)</a>
+
+
+</h3>
+
+<div class="desc">
+<p>Executes a template's logic with a data context. Otherwise identical to <code>UI.render</code>.</p>
+</div>
+
+<h4>Arguments</h4>
+
+<dl class="args">
+
+<dt><span class="name">template</span>
+  <span class="type">
+
+      Template
+
+  </span></dt>
+<dd><p>The particular template to evaluate.</p></dd>
+
+<dt><span class="name">data</span>
+  <span class="type">
+
+      Object
+
+  </span></dt>
+<dd><p>The data context that will be used when evaluating the template.</p></dd>
+
+</dl>
+
+<p></p></div><p></p>
+
+<div class="api ">
+
+<h3 id="ui_insert">
+  <a class="name selflink" href="#ui_insert">UI.insert(instantiatedComponent, parentNode[, nextNode])</a>
+
+
+</h3>
+
+<div class="desc">
+<p>Inserts an instantiated component into the DOM and calls its <a href="#template_rendered"><code>rendered</code></a> callback.</p>
+</div>
+
+<h4>Arguments</h4>
+
+<dl class="args">
+
+<dt><span class="name">instantiatedComponent</span>
+  <span class="type">
+
+      Instantiated component object
+
+  </span></dt>
+<dd><p>The return value from <code>UI.render</code> or <code>UI.renderWithData</code>.</p></dd>
+
+<dt><span class="name">parentNode</span>
+  <span class="type">
+
+      DOM Node
+
+  </span></dt>
+<dd><p>The node that will be the parent of the rendered template.</p></dd>
+
+<dt><span class="name">nextNode</span>
+  <span class="type">
+
+      DOM Node
+
+  </span></dt>
+<dd><p>If provided, must be a child of <em>parentNode</em>; the template will be inserted before this node. If not provided, the template will be inserted as the last child.</p></dd>
+
+</dl>
+
+<p></p></div><p></p>
+
+<div class="api bareapi">
+
+<h3 id="eventmaps">
+  <a class="name selflink" href="#eventmaps">Event Maps</a>
+
+</h3>
+
+<div class="desc">
+
+</div>
+
+<p>Several functions take event maps. An event map is an object where
+the properties specify a set of events to handle, and the values are
+the handlers for those events. The property can be in one of several
+forms:</p>
+
+<dl>
+
+
+
+    <dt><span class="name"><em>eventtype</em></span></dt>
+
+  <dd><p>Matches a particular type of event, such as 'click'.</p></dd>
+
+
+
+
+    <dt><span class="name"><em>eventtype selector</em></span></dt>
+
+  <dd><p>Matches a particular type of event, but only when it appears on
+an element that matches a certain CSS selector.</p></dd>
+
+
+
+
+    <dt><span class="name"><em>event1, event2</em></span></dt>
+
+  <dd><p>To handle more than one type of event with the same function, use a
+comma-separated list.</p></dd>
+</dl>
+
+<p>The handler function receives two arguments: <code>event</code>, an object with
+information about the event, and <code>template</code>, a <a href="#template_inst">template
+instance</a> for the template where the handler is
+defined.  The handler also receives some additional context data in
+<code>this</code>, depending on the context of the current element handling the
+event.  In a template, an element's context is the
+data context where that element occurs, which is set by
+block helpers such as <code>#with</code> and <code>#each</code>.</p>
+
+<p>Example:</p>
+
+<pre><code>{
+  // Fires when any element is clicked
+  'click': function (event) { ... },
+
+  // Fires when any element with the 'accept' class is clicked
+  'click .accept': function (event) { ... },
+
+  // Fires when 'accept' is clicked, or a key is pressed
+  'keydown, click .accept': function (event) { ... }
+}
+</code></pre>
+
+<p>Most events bubble up the document tree from their originating
+element.  For example, <code>'click p'</code> catches a click anywhere in a
+paragraph, even if the click originated on a link, span, or some other
+element inside the paragraph.  The originating element of the event
+is available as the <code>target</code> property, while the element that matched
+the selector and is currently handling it is called <code>currentTarget</code>.</p>
+
+<pre><code>{
+  'click p': function (event) {
+    var paragraph = event.currentTarget; // always a P
+    var clickedElement = event.target; // could be the P or a child element
+  }
+}
+</code></pre>
+
+<p>If a selector matches multiple elements that an event bubbles to, it
+will be called multiple times, for example in the case of <code>'click
+div'</code> or <code>'click *'</code>.  If no selector is given, the handler
+will only be called once, on the original target element.</p>
+
+<p>The following properties and methods are available on the event object
+passed to handlers:</p>
+
+<dl class="objdesc">
+
+
+
+    <dt><span class="name">type</span>
+      <span class="type">String</span>
+    </dt>
+
+  <dd><p>The event's type, such as "click", "blur" or "keypress".</p></dd>
+
+
+
+
+    <dt><span class="name">target</span>
+      <span class="type">DOM Element</span>
+    </dt>
+
+  <dd><p>The element that originated the event.</p></dd>
+
+
+
+
+    <dt><span class="name">currentTarget</span>
+      <span class="type">DOM Element</span>
+    </dt>
+
+  <dd><p>The element currently handling the event.  This is the element that
+matched the selector in the event map.  For events that bubble, it may
+be <code>target</code> or an ancestor of <code>target</code>, and its value changes as the
+event bubbles.</p></dd>
+
+
+
+
+    <dt><span class="name">which</span>
+      <span class="type">Number</span>
+    </dt>
+
+  <dd><p>For mouse events, the number of the mouse button (1=left, 2=middle, 3=right).
+For key events, a character or key code.</p></dd>
+
+
+
+
+    <dt><span class="name">stopPropagation()</span></dt>
+
+  <dd><p>Prevent the event from propagating (bubbling) up to other elements.
+Other event handlers matching the same element are still fired, in
+this and other event maps.</p></dd>
+
+
+
+
+    <dt><span class="name">stopImmediatePropagation()</span></dt>
+
+  <dd><p>Prevent all additional event handlers from being run on this event,
+including other handlers in this event map, handlers reached by
+bubbling, and handlers in other event maps.</p></dd>
+
+
+
+
+    <dt><span class="name">preventDefault()</span></dt>
+
+  <dd><p>Prevents the action the browser would normally take in response to this
+event, such as following a link or submitting a form.  Further handlers
+are still called, but cannot reverse the effect.</p></dd>
+
+
+
+
+    <dt><span class="name">isPropagationStopped()</span></dt>
+
+  <dd><p>Returns whether <code>stopPropagation()</code> has been called for this event.</p></dd>
+
+
+
+
+    <dt><span class="name">isImmediatePropagationStopped()</span></dt>
+
+  <dd><p>Returns whether <code>stopImmediatePropagation()</code> has been called for this event.</p></dd>
+
+
+
+
+    <dt><span class="name">isDefaultPrevented()</span></dt>
+
+  <dd><p>Returns whether <code>preventDefault()</code> has been called for this event.</p></dd>
+</dl>
+
+<p>Returning <code>false</code> from a handler is the same as calling
+both <code>stopImmediatePropagation</code> and <code>preventDefault</code> on the event.</p>
+
+<p>Event types and their uses include:</p>
+
+<dl class="objdesc">
+
+
+
+    <dt><span class="name"><code>click</code></span></dt>
+
+  <dd><p>Mouse click on any element, including a link, button, form control, or div.
+Use <code>preventDefault()</code> to prevent a clicked link from being followed.
+Some ways of activating an element from the keyboard also fire <code>click</code>.</p></dd>
+
+
+
+
+    <dt><span class="name"><code>dblclick</code></span></dt>
+
+  <dd><p>Double-click.</p></dd>
+
+
+
+
+    <dt><span class="name"><code>focus, blur</code></span></dt>
+
+  <dd><p>A text input field or other form control gains or loses focus.  You
+can make any element focusable by giving it a <code>tabindex</code> property.
+Browsers differ on whether links, checkboxes, and radio buttons are
+natively focusable.  These events do not bubble.</p></dd>
+
+
+
+
+    <dt><span class="name"><code>change</code></span></dt>
+
+  <dd><p>A checkbox or radio button changes state.  For text fields, use
+<code>blur</code> or key events to respond to changes.</p></dd>
+
+
+
+
+    <dt><span class="name"><code>mouseenter, mouseleave</code></span></dt>
+
+  <dd><p>The pointer enters or
+leaves the bounds of an element.  These events do not bubble.</p></dd>
+
+
+
+
+    <dt><span class="name"><code>mousedown, mouseup</code></span></dt>
+
+  <dd><p>The mouse button is newly down or up.</p></dd>
+
+
+
+
+    <dt><span class="name"><code>keydown, keypress, keyup</code></span></dt>
+
+  <dd><p>The user presses a keyboard key.  <code>keypress</code> is most useful for
+catching typing in text fields, while <code>keydown</code> and <code>keyup</code> can be
+used for arrow keys or modifier keys.</p></dd>
+
+</dl>
+
+<p>Other DOM events are available as well, but for the events above,
+Meteor has taken some care to ensure that they work uniformly in all
+browsers.</p>
+
+<p></p></div><p></p>
+
+      </section>
+    </div>
+    <footer>
+      <p>Project maintained by <a href="https://github.com/meteor">meteor</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+  </body>
+</html>
+
