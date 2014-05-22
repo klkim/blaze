@@ -429,6 +429,11 @@ button {
   position: absolute;
   right: 5px;
   margin-top: 7px;
-  font-size: 9px;
+  font-size: 12px;
+  color: #ddd;
+}
+
+.lang {
+  margin-left: 10px;
 }
 
