@@ -3,50 +3,13 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Meteor Blaze</title>
+    <title>Blaze: easy reactive templating</title>
 
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
     <script src="javascripts/scale.fix.js"></script>
 
-    <!-- This is how you link Blaze -->
-    <script src="https://s3.amazonaws.com/com.meteor/blaze.js"></script>
-
     <script>
-      // This should be part of the Blaze core
-
-      // Reactive variable for Blaze
-      Deps = Package.deps.Deps;
-      Blaze = {};
-      Blaze.Var = function (initVal) {
-        if (! (this instanceof Blaze.Var))
-          return new Blaze.Var(initVal);
-        this._dep = new Deps.Dependency;
-        this._value = initVal;
-      };
-
-      Blaze.Var.prototype.get = function () {
-        this._dep.depend();
-        return this._value;
-      };
-
-      Blaze.Var.prototype.set = function (val) {
-        if (this._value === val)
-          return val;
-        this._dep.changed();
-        return (this._value = val);
-      };
-
-      // Compile all the templates on the page to HTMLJS AST
-      $ = jQuery;
-      _ = Package.underscore._;
-      compileTemplate = function (script) {
-        var name = script.getAttribute('name');
-        var renderFuncCode = Spacebars.compile(script.innerHTML);
-        eval("Template.__define__(" + JSON.stringify(name) +
-             ", " + renderFuncCode + ");");
-      };
-
       function htmlEncode (input) {
         return String(input)
         .replace(/&/g, '&amp;')
@@ -59,7 +22,6 @@
       function renderExample (exampleName) {
         var $template = $("script[type='text/spacebars'][name='" + exampleName + "']");
         var templateText = $template.html().replace(/^ {10}/mg, ' ').trim();
-        compileTemplate($template[0]);
         var codeText = $("script[type='text/spacebars-code'][name='" + exampleName + "']").text().replace(/^ {10}/mg, '').trim();
         eval(codeText);
         UI.insert(UI.render(Template[exampleName]), $("#" + exampleName + " .example-result").get(0));
@@ -82,12 +44,12 @@
     <div class="wrapper">
       <header>
         <h1><a href="/blaze">Blaze</a></h1>
-        <p>Meteor's Reactive UI Library</p>
-        <p class="view"><a href="https://github.com/meteor/blaze">View the Project on GitHub <small>meteor/blaze</small></a></p>
+        <p>Easy reactive templating, by <b><a href="http://meteor.com" target="_blank">Meteor</a></b> (v0.1)</p>
+        <p class="view"><a href="https://github.com/meteor/blaze" target="_blank">View the Project on GitHub <small>meteor/blaze</small></a></p>
         <ul>
-          <li><a href="./docs.html">Read <strong>Docs</strong></a></li>
+          <li><a href="./docs.html" target="_blank">Read <strong>Docs</strong></a></li>
           <li><a href="https://groups.google.com/forum/#!forum/blazejs">Join the <strong>Discussion</strong></a></li>
-          <li><a href="https://github.com/meteor/blaze">View On <strong>GitHub</strong></a></li>
+          <li><a href="https://github.com/meteor/blaze">View on <strong>GitHub</strong></a></li>
         </ul>
       </header>
       <section>
@@ -95,36 +57,31 @@
         <section class="light home-section">
           <div class="highlights-row">
             <div class="highlights-col">
-              <h3>Reactive by default</h3>
-              <p>Relying on Deps, declarative reactive dependencies tracking
-                system, developers can write much simpler code dealing with
-                medium to bigger sized dependency graphs streamlining the
-                updates from the data-model and user-generated events.</p>
+              <h3>Extremely easy<br> to use</h3>
+              <p>With Blaze, you can write your app with normal
+                looking templates. You don't need to
+                declare dependencies or write any code to manage how
+                the screen updates: It's all automatic.</p>
             </div>
             <div class="highlights-col">
-              <h3>Minimal DOM updates</h3>
-              <p>Blaze takes care of changes in your data-model and
-                intelligently updates only relevant pieces of the HTML DOM or
-                SVG DOM with a blazing speed - thanks to structure-based
-                templates.</p>
+              <h3>High performance<br>&nbsp;</h3>
+              <p>When your data changes, Blaze makes the smallest
+              possible update to just the piece of the DOM that needs
+              to change or move and batches those updates to minimize
+              page reflows. Since most apps only update a few pieces
+              of data at a time, this approach leads to very efficient
+                updates.</p>
             </div>
             <div class="highlights-col">
-              <h3>jQuery plugins compitability</h3>
-              <p>Taking advantage of Blaze's component rendering model
-                developers can reuse existing jQuery plugins.</p>
+              <h3>Works well with other libraries</h3>
+              <p>Since Blaze only makes the smallest possible updates
+                to the DOM, apps written with Blaze can take advantage
+                of jQuery plugins or other JavaScript libraries that
+                modify elements in your app &mdash; including the same
+                elements managed by Blaze.</p>
             </div>
           </div>
         </section>
-
-        <!--
-        <div class="sub-box">
-          <form action="http://groups.google.com/group/blazejs/boxsubscribe">
-            Email:
-            <input type="text" name="email">
-            <input type="submit" name="sub" value="Subscribe to BlazeJS mailing list">
-          </form>
-        </div>
-        -->
 
         <h2>Installation</h2>
 
@@ -283,6 +240,8 @@
           });
         </script>
 
+        <script src="javascripts/blaze.js"></script>
+
         <script type="text/javascript">
           renderExample("example1");
           renderExample("example2");
@@ -291,7 +250,7 @@
       </section>
     </div>
     <footer>
-      <p>Project maintained by <a href="https://github.com/meteor">meteor</a></p>
+      <p>Project maintained by <a href="https://github.com/meteor">Meteor</a></p>
       <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
     </footer>
     <!--[if !IE]><script>fixScale(document);</script><![endif]-->
