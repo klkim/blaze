@@ -280,11 +280,11 @@ README</a>.</p>
 
 <h2 id="templates_api"><span><a class="selflink" href="#templates">Templates</a></span></h2>
 
-<p>When you write a template as <code>&lt;template name="foo"&gt; ... &lt;/template&gt;</code> in an HTML file in your app, Meteor generates a
+<p>When you write a template in an HTML file, Blaze generates a
 "component object" named <code>Template.foo</code>.</p>
 
 <div class="note">
-  <p>Meteor's component API is currently in flux. This section documents a few
+  <p>Blaze's component API is currently in flux. This section documents a few
    features of the component object that are useful for writing apps; a future
    release will elaborate more about how components work and about how to build
    components that aren't just template.</p>
@@ -293,7 +293,7 @@ README</a>.</p>
 <p>The same template may occur many times on a page, and these
 occurrences are called template instances.  Template instances have a
 life cycle of being created, put into the document, and later taken
-out of the document and destroyed.  Meteor manages these stages for
+out of the document and destroyed.  Blaze manages these stages for
 you, including determining when a template instance has been removed
 or replaced and should be cleaned up.  You can associate data with a
 template instance, and you can access its DOM nodes when it is in the
@@ -331,7 +331,7 @@ document.</p>
 new event handlers in addition to the existing ones.</p>
 
 <p>See <a href="#eventmaps">Event Maps</a> for a detailed description of the event
-map format and how event handling works in Meteor.</p>
+map format and how event handling works in Blaze.</p>
 
 <div class="api ">
 

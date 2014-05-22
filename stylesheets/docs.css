@@ -106,7 +106,7 @@ dl {
 }
 
 .selflink:before {
-  content: "# "
+//  content: "# "
 }
 
 .nav {
@@ -155,4 +155,3 @@ dl {
   color: #333333;
   letter-spacing: 0px;
 }
-
