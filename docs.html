@@ -698,7 +698,7 @@ data used changes.</p>
   do with them is pass them to <code>UI.insert</code>.</p>
 
 <p>Most users will not need to manually render components or manually insert them
-  into the DOM at all.  As of 0.8.0, if you call <code>UI.render</code> and never insert
+  into the DOM at all.  If you call <code>UI.render</code> and never insert
   the result into the DOM, the logic to keep the instantiated component updated
   will continue running in your browser forever. Additionally, if you remove any
   part of your DOM using any mechanism other than jQuery, the logic to keep that
@@ -1031,7 +1031,7 @@ used for arrow keys or modifier keys.</p></dd>
 </dl>
 
 <p>Other DOM events are available as well, but for the events above,
-Meteor has taken some care to ensure that they work uniformly in all
+Blaze has taken some care to ensure that they work uniformly in all
 browsers.</p>
 
 <p></p></div><p></p>
