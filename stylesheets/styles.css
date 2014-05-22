@@ -398,6 +398,7 @@ button {
   -moz-border-radius: 5px;
   border-radius: 5px;
   background: rgba(255, 255, 255, 0.8);
+  padding-bottom: 30px;
 }
 
 #example2 .example-result {
@@ -414,5 +415,13 @@ button {
   margin-left: auto;
   margin-right: auto;
   margin-bottom: 2em;
+}
+
+.codepen {
+  font-size: 10px;
+  margin-bottom: 2px;
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
 }
 
