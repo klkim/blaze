@@ -96,6 +96,11 @@
           You spent <b>{{seconds}}</b> seconds on this page.
         </script>
 
+        <script type="text/jade" name="example0">
+          | You spent <b>#{seconds}</b> seconds on this page
+        </script>
+
+
         <script type="text/spacebars-code" name="example0">
           var counter = new Blaze.Var(0);
 
@@ -125,6 +130,15 @@
           Click buttons to increase their values:
           <button id="number-a">{{a}}</button> &times; <button id="number-b">{{b}}</button> = {{c}}
         </script>
+
+        <script type="text/jade" name="example1">
+          | Click buttons to increase their values:
+          button#number-a #{a}
+          | &times;
+          button#number-b #{b}
+          | = #{c}
+        </script>
+
 
         <script type="text/spacebars-code" name="example1">
           var numberA = new Blaze.Var(1);
@@ -173,6 +187,18 @@
             <input type="submit" value="Add">
           </form>
         </script>
+
+        <script type="text/jade" name="example2">
+          p
+            b Contacts
+            button#toggle-order order
+          each contacts
+            div #{.}
+          form
+            input#new-contact(type='text')
+            input(type='submit', value='Add')
+        </script>
+
 
         <script type="text/spacebars-code" name="example2">
           var names = Blaze.Var(["Carl Friedrich Gauss", "Marie Curie",
@@ -238,6 +264,22 @@
             {{/each}}
           </svg>
         </script>
+
+        <script type="text/jade" name="example3">
+          svg(xmlns='http://www.w3.org/2000/svg', width='200', height='200', viewBox='-55 -55 110 110')
+            // bounding circle
+            circle(style='stroke: black; fill: #eee;', cx='0', cy='0', r='50')
+            // hour, minute and second hands
+            with handData
+              line({{radial hourDegrees 0 .55}} style='stroke-width: 3px; stroke: green;')
+              line({{radial minuteDegrees 0 .85}} style='stroke-width: 2px; stroke: blue;')
+              line({{radial secondDegrees 0 .95}} style='stroke-width: 1px; stroke: red;')
+
+            // tick marks
+            each hours
+              line({{radial degrees 0.9 1}} style='stroke-width: 3px; stroke: black;')
+        </script>
+
 
         <script type="text/spacebars-code" name="example3">
           var date = Blaze.Var(new Date);
