@@ -124,31 +124,31 @@ page update technology, you can render your HTML <em>reactively</em>, meaning
 that it will update automatically to track changes in the data used to
 generate it.</p>
 
-<p>Meteor makes it easy to use your favorite HTML templating language along with
-Meteor's live page update technology. Just write your template as you normally
-would, and Meteor will take care of making it update in realtime.</p>
+<p>Blaze makes it easy to use your favorite HTML templating language along with
+Blaze's live page update technology. Just write your template as you normally
+would, and Blaze will take care of making it update in realtime.</p>
 
-<p>Meteor ships with a templating language called
+<p>Blaze ships with a templating language called
 <a href="https://github.com/meteor/meteor/blob/devel/packages/spacebars/README.md" target="_blank">Spacebars</a>,
 inspired by <a href="http://handlebarsjs.com/" target="_blank">Handlebars</a>.  It shares some of the
 spirit and syntax of Handlebars, but it has been tailored to produce reactive
-Meteor templates when compiled.</p>
+Blaze templates when compiled.</p>
 
 <div class="note">
-  <p>Today, the only templating system that ships with Meteor is Spacebars, though
+  <p>Today, the only templating system that ships with Blaze is Spacebars, though
   our community has created packages for other languages such as
   <a href="https://atmospherejs.com/package/jade" target="_blank">Jade</a>.</p>
 </div>
 
-<p>To define templates, create a file in your project with the <code>.html</code>
-extension. In the file, make a <code>&lt;template&gt;</code> tag and give it a
-<code>name</code> attribute. Put the template contents inside the tag. Meteor
-will precompile the template, ship it down to the client, and make it
+<p>To define templates, make
+a <code>&lt;script&gt;</code> tag in your HTML and give it a
+<code>name</code> attribute and a <code>type</code> attribute with value
+"text/spacebars". Put the template contents inside the tag. Blaze will
+compile the template and make it
 available as on the global <code>Template</code> object.</p>
 
-<p>When you app is loaded, it automatically renders the special template called
-<code>&lt;body&gt;</code>, which is written using the <code>&lt;body&gt;</code> element instead of a
-<code>&lt;template&gt;</code>. You insert a template inside another template by using the
+<p>When your app is loaded, it automatically renders the special template called
+<code>main</code>. You insert a template inside another template by using the
 <code>{{&gt; inclusion}}</code> operator.</p>
 
 <p>The easiest way to get data into templates is by defining helper
@@ -156,26 +156,27 @@ functions in JavaScript. Just add the helper functions directly on the
 <code>Template.</code><em>templateName</em> object. Putting it all together:</p>
 
 <pre><code>&lt;!-- in myapp.html --&gt;
-&lt;body&gt;
+&lt;script type="text/spacebars" name="main"&gt;
   &lt;h1&gt;Today's weather!&lt;/h1&gt;
   {{&gt; forecast}}
-&lt;/body&gt;
+&lt;/script&gt;
 
-&lt;template name="forecast"&gt;
+&lt;script type="text/spacebars" name="forecast"&gt;
   &lt;div&gt;It'll be {{prediction}} tonight&lt;/div&gt;
-&lt;/template&gt;</code></pre>
+&lt;/script&gt;</code></pre>
 
-<pre><code>// in client/myapp.js: reactive helper function
+<pre><code>// in myapp.js: reactive helper function
+weather = new Blaze.Var();
 Template.forecast.prediction = function () {
-  return Session.get("weather");
+  return weather.get();
 };
 
 // in the JavaScript console
-&gt; Session.set("weather", "cloudy");
+&gt; weather.set("cloudy");
 &gt; document.body.innerHTML
  =&gt; "&lt;h1&gt;Today's weather!&lt;/h1&gt; &lt;div&gt;It'll be cloudy tonight&lt;/div&gt;"
 
-&gt; Session.set("weather", "cool and dry");
+&gt; weather.set("cool and dry");
 &gt; document.body.innerHTML
  =&gt; "&lt;h1&gt;Today's weather!&lt;/h1&gt; &lt;div&gt;It'll be cool and dry tonight&lt;/div&gt;"
 </code></pre>
@@ -183,21 +184,22 @@ Template.forecast.prediction = function () {
 <p>To iterate over an array or database cursor, use <code>{{#each}}</code>:</p>
 
 <pre><code>&lt;!-- in myapp.html --&gt;
-&lt;template name="players"&gt;
+&lt;script type="text/spacebars" name="players"&gt;
   {{#each topScorers}}
     &lt;div&gt;{{name}}&lt;/div&gt;
   {{/each}}
-&lt;/template&gt;</code></pre>
+&lt;/script&gt;</code></pre>
 
 <pre><code>// in myapp.js
+var players = new Blaze.Var([ { name: "Alice", score: 150 }, { name: "Bob", score: 125 } ]);
 Template.players.topScorers = function () {
-  return Users.find({score: {$gt: 100}}, {sort: {score: -1}});
+  return players;
 };</code></pre>
 
 <p>In this case, the data is coming from a database query. When the
-database cursor is passed to <code>{{#each}}</code>, it will wire up all of the
-machinery to efficiently add and move DOM nodes as new results enter
-the query.</p>
+<code>players</code> variable is passed to <code>{{#each}}</code>, it
+will wire up all of the machinery to efficiently add and move DOM nodes
+as the variable changes.</p>
 
 <p>Helpers can take arguments, and they receive the current template context data
 in <code>this</code>. Note that some block helpers change the current context (notably
@@ -209,7 +211,7 @@ Template.players.leagueIs = function (league) {
 };</code></pre>
 
 <pre><code>&lt;!-- in a HTML file --&gt;
-&lt;template name="players"&gt;
+&lt;script type="text/spacebars" name="players"&gt;
   {{#each topScorers}}
     {{#if leagueIs "junior"}}
       &lt;div&gt;Junior: {{name}}&lt;/div&gt;
@@ -218,7 +220,7 @@ Template.players.leagueIs = function (league) {
       &lt;div&gt;Senior: {{name}}&lt;/div&gt;
     {{/if}}
   {{/each}}
-&lt;/template&gt;
+&lt;/script&gt;
 </code></pre>
 
 <p>Helpers can also be used to pass in constant data.</p>
@@ -233,23 +235,40 @@ Maps</a>. The <code>this</code> argument to the event handler will be
 the data context of the element that triggered the event.</p>
 
 <pre><code>&lt;!-- myapp.html --&gt;
-&lt;template name="scores"&gt;
-  {{#each player}}
-    {{&gt; playerScore}}
+&lt;script type="text/spacebars" name="scores"&gt;
+  {{#each players}}
+    {{&gt; playerName}}
   {{/each}}
-&lt;/template&gt;
+  {{#if currentPlayer}}
+    {{currentPlayer}}'s score is {{currentScore}}
+  {{/if}}
+&lt;/script&gt;
 </code></pre>
 
-<pre><code>&lt;template name="playerScore"&gt;
-  &lt;div&gt;{{name}}: {{score}}
-    &lt;span class="givePoints"&gt;Give points&lt;/span&gt;
+<pre><code>&lt;script type="text/spacebars" name="playerName"&gt;
+  &lt;div&gt;{{name}}
+    &lt;span class="selectPlayer"&gt;Show score&lt;/span&gt;
   &lt;/div&gt;
-&lt;/template&gt;</code></pre>
+&lt;/script&gt;</code></pre>
 
 <code><pre>// myapp.js
+var players = new Blaze.Var([ { name: "Alice", score: 150 }, { name: "Bob", score: 125 } ]);
+var currentPlayer = new Blaze.Var();
+var currentScore = new Blaze.Var();
+
 Template.playerScore.events({
-  'click .givePoints': function () {
-    Users.update(this._id, {$inc: {score: 2}});
+  'click .selectPlayer': function () {
+    currentPlayer.set(this.name);
+    currentScore.set(this.score);
+  }
+});
+
+Template.scores.helpers({
+  currentPlayer: function () {
+    return currentPlayer.get();
+  },
+  currentPlayer: function () {
+    return currentScore.get();
   }
 });
 </code></pre>
@@ -1044,4 +1063,3 @@ browsers.</p>
     <!--[if !IE]><script>fixScale(document);</script><![endif]-->
   </body>
 </html>
-
