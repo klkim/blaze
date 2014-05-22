@@ -233,13 +233,10 @@
         </div>
 
         <script type="text/spacebars" name="example3">
-          <svg xmlns="http://www.w3.org/2000/svg"
-               width="200" height="200"
-               viewBox="-55 -55 110 110">
+          <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="-55 -55 110 110">
 
             <!-- bounding circle -->
-            <circle style="stroke: black; fill: #eee;"
-                    cx="0" cy="0" r="50"/>
+            <circle style="stroke: black; fill: #eee;" cx="0" cy="0" r="50"/>
 
             <!-- hour, minute and second hands -->
             {{#with handData}}
@@ -253,8 +250,7 @@
 
             <!-- tick marks -->
             {{#each hours}}
-              <line {{radial degrees 0.9 1}}
-                    style="stroke-width: 3px; stroke: black;" />
+              <line {{radial degrees 0.9 1}} style="stroke-width: 3px; stroke: black;"/>
             {{/each}}
           </svg>
         </script>
@@ -263,15 +259,11 @@
           var date = Blaze.Var(new Date);
 
           // every second update the reactive time and date value
-          setInterval(function () {
-            date.set(new Date);
-          }, 1000);
+          setInterval(function () { date.set(new Date); }, 1000);
 
           Template.example3.helpers({
             hours: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-            degrees: function () {
-              return 30 * this;
-            },
+            degrees: function () { return 30 * this; },
             handData: function () {
               var time = date.get();
               return { hourDegrees: time.getHours() * 30,
