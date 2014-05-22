@@ -10,65 +10,22 @@
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
     <script src="javascripts/scale.fix.js"></script>
 
-    <!-- This is how you link Blaze -->
-    <script src="https://s3.amazonaws.com/com.meteor/blaze.js"></script>
+    <script type="text/javascript">
+  if (document.location.host.match(/^(www\.)?meteor.com(:80)?$/)) {
+    // Google analytics.
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-30093278-1']);
+    _gaq.push(['_setDomainName', 'www.meteor.com']);
+    _gaq.push(['_trackPageview']);
 
-    <script>
-      // This should be part of the Blaze core
-
-      // Reactive variable for Blaze
-      Deps = Package.deps.Deps;
-      Blaze = {};
-      Blaze.Var = function (initVal) {
-        if (! (this instanceof Blaze.Var))
-          return new Blaze.Var(initVal);
-        this._dep = new Deps.Dependency;
-        this._value = initVal;
-      };
-
-      Blaze.Var.prototype.get = function () {
-        this._dep.depend();
-        return this._value;
-      };
-
-      Blaze.Var.prototype.set = function (val) {
-        if (this._value === val)
-          return val;
-        this._dep.changed();
-        return (this._value = val);
-      };
-
-      // Compile all the templates on the page to HTMLJS AST
-      $ = jQuery;
-      _ = Package.underscore._;
-      compileTemplate = function (script) {
-        var name = script.getAttribute('name');
-        var renderFuncCode = Spacebars.compile(script.innerHTML);
-        eval("Template.__define__(" + JSON.stringify(name) +
-             ", " + renderFuncCode + ");");
-      };
-
-      function htmlEncode (input) {
-        return String(input)
-        .replace(/&/g, '&amp;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, "'")
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-      }
-
-      function renderExample (exampleName) {
-        var $template = $("script[type='text/spacebars'][name='" + exampleName + "']");
-        var templateText = $template.html().replace(/^ {10}/mg, ' ').trim();
-        compileTemplate($template[0]);
-        var codeText = $("script[type='text/spacebars-code'][name='" + exampleName + "']").text().replace(/^ {10}/mg, '').trim();
-        eval(codeText);
-        UI.insert(UI.render(Template[exampleName]), $("#" + exampleName + " .example-result").get(0));
-        $("#" + exampleName + " .example-code").append($('<pre><code>' + htmlEncode(templateText) + '</code></pre>'));
-        $("#" + exampleName + " .example-code").append($('<pre><code>' + codeText + '</code></pre>'));
-      }
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
     </script>
 
+    <script src="javascripts/blaze.js"></script>
     <link rel="stylesheet" href="highlight/styles/sunburst.css">
     <script src="highlight/highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
