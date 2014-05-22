@@ -137,6 +137,15 @@ Template.forecast.prediction = function () {
  =&gt; "&lt;h1&gt;Today's weather!&lt;/h1&gt; &lt;div&gt;It'll be cool and dry tonight&lt;/div&gt;"
 </code></pre>
 
+<p>In this example, we used a <code>Blaze.Var</code>, which is a
+reactive data source that can contain any JSON-able value. You can get
+and set the value of a <code>Blaze.Var</code> with
+its <code>get()</code> and <code>set()</code>
+methods. Because <code>Blaze.Var</code> is a reactive data source, when
+you use one from within a template helper, the helper will re-run and the
+relevant parts of the DOM will be updated whenever the variable's value
+changes.</p>
+
 <p>To iterate over an array or database cursor, use <code>{{#each}}</code>:</p>
 
 <pre><code>&lt;!-- in myapp.html --&gt;
