@@ -401,8 +401,13 @@ button {
 }
 
 #example2 .example-result {
+  margin-top: 220px;
+}
+
+#example3 .example-result {
   margin-top: 420px;
 }
+
 
 .sub-box {
   width: 500px;
