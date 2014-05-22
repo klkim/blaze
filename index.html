@@ -82,24 +82,41 @@
             </div>
           </div>
         </section>
-
-        <h2>Using Blaze</h2>
-
-        <p>Using Blaze in your page is very simple. Define your
-        templates in special &lt;script> tags and then
-    load <a href="javascripts/blaze.js">blaze.js</a>. Here's an example of
-    a very simple app in a single .html file:
-
-    XXX add codepen link
-
-
         <h2>Examples</h2>
+        <h3>Simplest data bindings</h3>
+
+        <div id="example0" class="example-section">
+          <div class="example-result">
+            <div class="codepen"><a target="_blank" href="http://codepen.io/imslavko/pen/bcxus?editors=100">Open this on Codepen.io</a></div>
+          </div>
+          <div class="example-code"></div>
+        </div>
+
+        <script type="text/spacebars" name="example0">
+          You spent <b>{{seconds}}</b> seconds on this page.
+        </script>
+
+        <script type="text/spacebars-code" name="example0">
+          var counter = new Blaze.Var(0);
+
+          Template.example0.helpers({
+            seconds: function () {
+              return counter.get();
+            }
+          });
+
+          setInterval(function () {
+            counter.set(counter.get() + 1);
+          }, 1000);
+        </script>
+
+
         <h3>Use reactive variables in your code</h3>
 
         <p>Use Handlebar's style templates with helpers and reactive variables.</p>
         <div id="example1" class="example-section">
           <div class="example-result">
-            <div class="codepen"><a target="_blank" href="http://codepen.io/imslavko/pen/hKjAD" >Open this on Codepen.io</a></div>
+            <div class="codepen"><a target="_blank" href="http://codepen.io/imslavko/pen/hKjAD?editors=100">Open this on Codepen.io</a></div>
           </div>
           <div class="example-code"></div>
         </div>
@@ -140,7 +157,7 @@
 
         <div id="example2" class="example-section">
           <div class="example-result">
-            <div class="codepen"><a target="_blank" href="http://codepen.io/imslavko/pen/KhAyp" >Open this on Codepen.io</a></div>
+            <div class="codepen"><a target="_blank" href="http://codepen.io/imslavko/pen/KhAyp?editors=100">Open this on Codepen.io</a></div>
           </div>
           <div class="example-code"></div>
         </div>
@@ -195,7 +212,7 @@
 
         <div id="example3" class="example-section">
           <div class="example-result">
-            <div class="codepen"><a target="_blank" href="http://codepen.io/imslavko/pen/uwiDF" >Open this on Codepen.io</a></div>
+            <div class="codepen"><a target="_blank" href="http://codepen.io/imslavko/pen/uwiDF?editors=100">Open this on Codepen.io</a></div>
           </div>
           <div class="example-code"></div>
         </div>
@@ -253,6 +270,7 @@
         <script src="javascripts/blaze.js"></script>
 
         <script type="text/javascript">
+          renderExample("example0");
           renderExample("example1");
           renderExample("example2");
           renderExample("example3");
