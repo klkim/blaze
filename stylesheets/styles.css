@@ -425,3 +425,9 @@ button {
   bottom: 5px;
 }
 
+.lang-switch {
+  position: absolute;
+  right: 5px;
+  margin-top: 7px;
+}
+
