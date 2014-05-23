@@ -433,6 +433,12 @@ button {
   color: #ddd;
 }
 
+.lang-switch input,
+.lang-switch label {
+  cursor: pointer;
+  padding: 10px 5px 10px 0;
+}
+
 .lang {
   margin-left: 10px;
 }
