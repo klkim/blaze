@@ -40,7 +40,7 @@
         var codeText = $("script[type='text/spacebars-code'][name='" + exampleName + "']").text().replace(/^ {10}/mg, '').trim();
         eval(codeText);
         UI.insert(UI.render(Template[exampleName]), $("#" + exampleName + " .example-result").get(0));
-        $("#" + exampleName + " .example-code").append($('<form class="lang-switch"><input class="lang" type="radio" name="lang" value="spacebars" checked>Handlebars<input class="lang" type="radio" name="lang" value="jade">Jade</form>'));
+        $("#" + exampleName + " .example-code").append($('<form class="lang-switch"><input id="' + exampleName + '-lang-spacebars" class="lang" type="radio" name="lang" value="spacebars" checked><label for="' + exampleName + '-lang-spacebars">Handlebars</label><input id="' + exampleName + '-lang-jade" class="lang" type="radio" name="lang" value="jade"><label for="' + exampleName + '-lang-jade">Jade</label></form>'));
 
         $("#" + exampleName + " .example-code").append($('<pre><code>' + htmlEncode(templateText) + '</code></pre>'));
         $("#" + exampleName + " .example-code").append($('<pre><code>' + codeText + '</code></pre>'));
