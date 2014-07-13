@@ -160,9 +160,9 @@
 
         <script type="text/jade" name="example1">
           | Click buttons to increase their values:
-          button#number-a #{a}
+          button#number-a= a
           | &times;
-          button#number-b #{b}
+          button#number-b= b
           | = #{c}
         </script>
 
@@ -223,7 +223,7 @@
             div #{.}
           form
             input#new-contact(type='text')
-            input(type='submit', value='Add')
+            input(type='submit' value='Add')
         </script>
 
 
