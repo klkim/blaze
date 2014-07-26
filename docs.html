@@ -221,7 +221,7 @@ var players = new Blaze.Var([ { name: "Alice", score: 150 }, { name: "Bob", scor
 var currentPlayer = new Blaze.Var();
 var currentScore = new Blaze.Var();
 
-Template.playerScore.events({
+Template.playerName.events({
   'click .selectPlayer': function () {
     currentPlayer.set(this.name);
     currentScore.set(this.score);
@@ -232,7 +232,7 @@ Template.scores.helpers({
   currentPlayer: function () {
     return currentPlayer.get();
   },
-  currentPlayer: function () {
+  currentScore: function () {
     return currentScore.get();
   }
 });
